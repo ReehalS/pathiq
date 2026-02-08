@@ -34,13 +34,11 @@ export function RecommendedCareers({
         {recommendations.map(({ career, matchReasons }) => (
           <div key={career.id} className="flex flex-col">
             {matchReasons.length > 0 && (
-              <div className="mb-1.5 flex flex-wrap gap-1">
-                {matchReasons.slice(0, 2).map((reason) => (
-                  <span
-                    key={reason}
-                    className="text-xs text-primary font-medium"
-                  >
-                    {reason}
+              <div className="mb-1.5 flex flex-wrap items-center gap-1">
+                {matchReasons.slice(0, 2).map((reason, i) => (
+                  <span key={reason} className="flex items-center gap-1">
+                    {i > 0 && <span className="text-xs text-muted-foreground">·</span>}
+                    <span className="text-xs text-primary font-medium">{reason}</span>
                   </span>
                 ))}
               </div>

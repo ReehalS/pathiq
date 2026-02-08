@@ -4,7 +4,6 @@ export const PATH_TYPE_OPTIONS: { value: PathType; label: string }[] = [
   { value: "industry-job", label: "Industry Job" },
   { value: "graduate-school", label: "Graduate School" },
   { value: "research", label: "Research" },
-  { value: "fellowship", label: "Fellowship" },
   { value: "professional-school", label: "Professional School" },
   { value: "alternative", label: "Alternative" },
 ];
@@ -32,10 +31,9 @@ export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 ];
 
 export const WORK_LIFE_OPTIONS: { value: string; label: string }[] = [
-  { value: "Excellent", label: "Excellent" },
-  { value: "Above Average", label: "Above Average" },
-  { value: "Average", label: "Average" },
-  { value: "Below Average", label: "Below Average" },
+  { value: "Good", label: "Good" },
+  { value: "Moderate", label: "Moderate" },
+  { value: "Poor", label: "Poor" },
 ];
 
 export const RIASEC: Record<string, { name: string; description: string }> = {

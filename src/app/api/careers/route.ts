@@ -42,7 +42,9 @@ export async function GET(request: NextRequest) {
 
   if (workLifeBalance) {
     const wlbValues = workLifeBalance.split(',');
-    query = query.in('work_life_balance', wlbValues);
+    // DB stores free-text like "Good - standard hours...", match by prefix
+    const wlbFilter = wlbValues.map((v) => `work_life_balance.ilike.${v}%`).join(',');
+    query = query.or(wlbFilter);
   }
 
   // Sort (health sort handled in memory after score computation)
