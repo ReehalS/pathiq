@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Career } from '@/lib/types';
 import {
@@ -19,6 +19,7 @@ import { EmploymentTrendChart } from '@/components/employment-trend-chart';
 import { SalaryDistributionChart } from '@/components/salary-distribution-chart';
 import { PercentileCalculator } from '@/components/percentile-calculator';
 import { HealthScoreDetail } from '@/components/health-score-badge';
+import { PremiumButton } from '@/components/auth/premium-gate';
 import { useMarketTrends } from '@/hooks/use-market-trends';
 import { calculateHealthScore } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -44,6 +45,7 @@ import {
 
 export default function CareerDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const [career, setCareer] = useState<Career | null>(null);
   const [loading, setLoading] = useState(true);
   const careerId = typeof params.id === 'string' ? params.id : '';
@@ -510,18 +512,23 @@ export default function CareerDetailPage() {
       {/* CTA Buttons */}
       <Separator />
       <div className="flex flex-wrap gap-3">
-        <Link href={`/compare?paths=${career.id}`}>
-          <Button className="gap-2">
-            <GitCompare className="h-4 w-4" />
-            Compare this path
-          </Button>
-        </Link>
-        <Link href={`/chat?about=${career.id}`}>
-          <Button variant="outline" className="gap-2">
-            <MessageSquare className="h-4 w-4" />
-            Ask AI about this career
-          </Button>
-        </Link>
+        <PremiumButton
+          feature="Career Comparison"
+          onClick={() => router.push(`/compare?paths=${career.id}`)}
+          className="gap-2"
+        >
+          <GitCompare className="h-4 w-4" />
+          Compare this path
+        </PremiumButton>
+        <PremiumButton
+          feature="AI Career Chat"
+          variant="outline"
+          onClick={() => router.push(`/chat?about=${career.id}`)}
+          className="gap-2"
+        >
+          <MessageSquare className="h-4 w-4" />
+          Ask AI about this career
+        </PremiumButton>
       </div>
     </div>
   );

@@ -104,13 +104,48 @@ CREATE INDEX idx_careers_category ON careers(category);
 CREATE INDEX idx_careers_salary ON careers(salary_median);
 CREATE INDEX idx_market_trends_career ON market_trends(career_id, date);
 
--- Enable Row Level Security (open for now, no auth)
+-- User profiles (for authenticated users)
+CREATE TABLE user_profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT,
+  year TEXT,
+  major TEXT,
+  interests TEXT[] DEFAULT '{}',
+  values JSONB DEFAULT '{"compensation": 50, "impact": 50, "flexibility": 50, "stability": 50}',
+  location_preferences TEXT[] DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX idx_user_profiles_id ON user_profiles(id);
+
+-- Enable Row Level Security
 ALTER TABLE careers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE market_trends ENABLE ROW LEVEL SECURITY;
 ALTER TABLE comparisons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 
+-- Public data policies
 CREATE POLICY "Public read careers" ON careers FOR SELECT USING (true);
 CREATE POLICY "Public read trends" ON market_trends FOR SELECT USING (true);
 CREATE POLICY "Public insert trends" ON market_trends FOR INSERT WITH CHECK (true);
 CREATE POLICY "Public update trends" ON market_trends FOR UPDATE USING (true);
 CREATE POLICY "Public all comparisons" ON comparisons FOR ALL USING (true);
+
+-- User profile policies (authenticated only)
+CREATE POLICY "Users can read own profile" ON user_profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users can insert own profile" ON user_profiles FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "Users can update own profile" ON user_profiles FOR UPDATE USING (auth.uid() = id);
+
+-- Auto-create profile on signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.user_profiles (id) VALUES (NEW.id) ON CONFLICT (id) DO NOTHING;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();

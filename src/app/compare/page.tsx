@@ -10,6 +10,8 @@ import { SalaryChart } from "@/components/salary-chart";
 import { SkillsRadar } from "@/components/skills-radar";
 import { AIAnalysis } from "@/components/ai-analysis";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PremiumGate } from "@/components/auth/premium-gate";
+import { GitCompare } from "lucide-react";
 
 function CompareContent() {
   const searchParams = useSearchParams();
@@ -164,8 +166,14 @@ function CompareContent() {
 
 export default function ComparePage() {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-6xl px-4 py-8">Loading...</div>}>
-      <CompareContent />
-    </Suspense>
+    <PremiumGate
+      feature="Career Comparison"
+      description="Compare career paths side-by-side with AI-powered trade-off analysis tailored to your profile."
+      icon={GitCompare}
+    >
+      <Suspense fallback={<div className="mx-auto max-w-6xl px-4 py-8">Loading...</div>}>
+        <CompareContent />
+      </Suspense>
+    </PremiumGate>
   );
 }

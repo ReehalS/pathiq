@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Briefcase, TrendingUp, Sparkles } from 'lucide-react';
 import { HealthScoreBadge } from '@/components/health-score-badge';
+import { PremiumButton } from '@/components/auth/premium-gate';
 
 interface CareerCardProps {
   career: Career;
@@ -101,16 +102,14 @@ export function CareerCard({ career, onCompare }: CareerCardProps) {
         {/* Actions — pinned to bottom */}
         <div className="flex items-center gap-2 pt-2 mt-auto">
           {onCompare && (
-            <Button
+            <PremiumButton
+              feature="Career Comparison"
               variant="outline"
               size="sm"
-              onClick={(e) => {
-                e.preventDefault();
-                onCompare(career.id);
-              }}
+              onClick={() => onCompare(career.id)}
             >
               Compare
-            </Button>
+            </PremiumButton>
           )}
           <Link href={`/careers/${career.id}`} className="flex-1">
             <Button variant="ghost" size="sm" className="w-full gap-1">
