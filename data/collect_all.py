@@ -17,7 +17,9 @@ from fetch_onet import get_onet_data
 from fetch_job_openings import get_job_openings
 from scrape_levels import get_levels_data
 from scrape_layoffs import get_layoff_data
-from seed_supabase import seed_careers
+from fetch_bls_history import get_historical_data
+from validate_data import validate_careers
+from seed_supabase import seed_careers, seed_market_trends
 
 def estimate_salary_trajectory(oews_entry):
     """Estimate salary trajectory from BLS percentile data."""
@@ -265,8 +267,14 @@ def main():
     levels = get_levels_data(career_mapping)
     sources["levels.fyi"] = len(levels) > 0
 
-    layoffs = get_layoff_data(career_mapping)
-    sources["layoffs.fyi"] = len(layoffs) > 0
+    layoffs, layoffs_live = get_layoff_data(career_mapping)
+    if layoffs_live:
+        sources["layoffs.fyi"] = True
+    else:
+        sources["layoffs.fyi (fallback)"] = True
+
+    historical = get_historical_data(career_mapping)
+    sources["BLS Historical"] = len(historical) > 0
 
     # Combine all data
     print("\n" + "=" * 40)
@@ -282,12 +290,27 @@ def main():
         print(f"  {career_id}: ${record.get('salary_median', 0):,} median, "
               f"{record.get('growth_rate', 'N/A')} growth")
 
+    # Validate data
+    print("\n" + "=" * 40)
+    print("VALIDATING DATA")
+    print("=" * 40)
+
+    warnings = validate_careers(careers_data)
+    if warnings:
+        print(f"  [warn] {len(warnings)} validation warnings (see above)")
+    else:
+        print("  [ok] All data passed validation")
+
     # Seed to Supabase
     print("\n" + "=" * 40)
     print("SEEDING DATABASE")
     print("=" * 40)
 
     success = seed_careers(careers_data)
+
+    # Seed historical market trends
+    if historical:
+        seed_market_trends(historical, career_mapping)
 
     # Summary
     print("\n" + "=" * 60)

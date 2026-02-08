@@ -14,9 +14,14 @@ import {
 import { getCategoryColor, getPathTypeLabel } from '@/lib/constants';
 import { SalaryChart } from '@/components/salary-chart';
 import { SkillsRadar } from '@/components/skills-radar';
+import { SalaryHistoryChart } from '@/components/salary-history-chart';
+import { EmploymentTrendChart } from '@/components/employment-trend-chart';
+import { SalaryDistributionChart } from '@/components/salary-distribution-chart';
+import { useMarketTrends } from '@/hooks/use-market-trends';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -31,12 +36,15 @@ import {
   Clock,
   MessageSquare,
   GitCompare,
+  Sparkles,
 } from 'lucide-react';
 
 export default function CareerDetailPage() {
   const params = useParams();
   const [career, setCareer] = useState<Career | null>(null);
   const [loading, setLoading] = useState(true);
+  const careerId = typeof params.id === 'string' ? params.id : '';
+  const { trends, loading: trendsLoading } = useMarketTrends(careerId);
 
   useEffect(() => {
     async function fetchCareer() {
@@ -87,6 +95,9 @@ export default function CareerDetailPage() {
     high: 'text-red-600',
   };
 
+  const hasTrends = trends.length > 0;
+  const description = career.ai_description || career.description;
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 space-y-8">
       {/* Back Button */}
@@ -110,8 +121,14 @@ export default function CareerDetailPage() {
         </div>
         <h1 className="text-3xl font-bold tracking-tight">{career.title}</h1>
         <p className="text-muted-foreground mt-2 max-w-3xl">
-          {career.description}
+          {description}
         </p>
+        {career.ai_description && (
+          <div className="flex items-center gap-1 mt-1">
+            <Sparkles className="h-3 w-3 text-purple-500" />
+            <span className="text-xs text-purple-500">AI-enhanced</span>
+          </div>
+        )}
       </div>
 
       {/* Key Metrics Row */}
@@ -144,19 +161,70 @@ export default function CareerDetailPage() {
         />
       </div>
 
-      {/* Salary Trajectory Chart */}
+      {/* Salary Charts */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Salary Trajectory</CardTitle>
+          <CardTitle className="text-lg">Compensation</CardTitle>
         </CardHeader>
         <CardContent>
-          <SalaryChart careers={[career]} showArea />
-          <p className="text-xs text-muted-foreground mt-2">
-            Source: {career.salary_source || 'BLS OEWS'}. Trajectory estimated
-            from wage percentile distribution.
-          </p>
+          <Tabs defaultValue="trajectory" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 max-w-sm">
+              <TabsTrigger value="trajectory" className="text-xs">
+                Salary Trajectory
+              </TabsTrigger>
+              <TabsTrigger value="distribution" className="text-xs">
+                Salary Distribution
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="trajectory" className="mt-4">
+              <SalaryChart careers={[career]} showArea />
+              <p className="text-xs text-muted-foreground mt-2">
+                Source: {career.salary_source || 'BLS OEWS'}. Trajectory estimated
+                from wage percentile distribution.
+              </p>
+            </TabsContent>
+            <TabsContent value="distribution" className="mt-4">
+              <SalaryDistributionChart career={career} />
+              <p className="text-xs text-muted-foreground mt-2">
+                Source: BLS OEWS May 2024. Shows salary range from 25th to 90th percentile.
+              </p>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
+
+      {/* Historical Market Data */}
+      {!trendsLoading && hasTrends && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Historical Market Data</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="salary-history" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 max-w-sm">
+                <TabsTrigger value="salary-history" className="text-xs">
+                  Salary History
+                </TabsTrigger>
+                <TabsTrigger value="employment-trend" className="text-xs">
+                  Employment Trend
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="salary-history" className="mt-4">
+                <SalaryHistoryChart trends={trends} />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Source: BLS Occupational Employment and Wage Statistics (OES), annual May estimates
+                </p>
+              </TabsContent>
+              <TabsContent value="employment-trend" className="mt-4">
+                <EmploymentTrendChart trends={trends} />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Source: BLS Occupational Employment and Wage Statistics (OES), annual May estimates
+                </p>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Skills Radar */}
       {career.skills.length > 0 && (
@@ -178,7 +246,7 @@ export default function CareerDetailPage() {
         {/* Left Column */}
         <div className="space-y-6">
           {/* Work Details */}
-          <Card>
+          <Card className="gap-4">
             <CardHeader>
               <CardTitle className="text-lg">Work Details</CardTitle>
             </CardHeader>
@@ -215,7 +283,7 @@ export default function CareerDetailPage() {
           </Card>
 
           {/* Requirements */}
-          <Card>
+          <Card className="gap-4">
             <CardHeader>
               <CardTitle className="text-lg">Requirements</CardTitle>
             </CardHeader>
@@ -254,6 +322,17 @@ export default function CareerDetailPage() {
               {career.experience && (
                 <DetailRow label="Experience" value={career.experience} />
               )}
+              {career.ai_requirements && (
+                <div>
+                  <div className="flex items-center gap-1 mb-1">
+                    <Sparkles className="h-3 w-3 text-purple-500" />
+                    <span className="text-xs text-purple-500">AI-enhanced</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground whitespace-pre-line">
+                    {career.ai_requirements}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -261,7 +340,7 @@ export default function CareerDetailPage() {
         {/* Right Column */}
         <div className="space-y-6">
           {/* Skills & Interests */}
-          <Card>
+          <Card className="gap-4">
             <CardHeader>
               <CardTitle className="text-lg">Skills & Interests</CardTitle>
             </CardHeader>
@@ -272,7 +351,7 @@ export default function CareerDetailPage() {
                     Key Skills
                   </p>
                   <div className="flex flex-wrap gap-1">
-                    {career.skills.map((s) => (
+                    {[...new Set(career.skills)].map((s) => (
                       <Badge key={s} variant="secondary" className="text-xs">
                         {s}
                       </Badge>
@@ -286,7 +365,7 @@ export default function CareerDetailPage() {
                     RIASEC Interests
                   </p>
                   <div className="flex flex-wrap gap-1">
-                    {career.interests.map((i) => (
+                    {[...new Set(career.interests)].map((i) => (
                       <Badge key={i} variant="outline" className="text-xs">
                         {i}
                       </Badge>
@@ -312,25 +391,61 @@ export default function CareerDetailPage() {
           </Card>
 
           {/* Career Trajectory */}
-          <Card>
+          <Card className="gap-4">
             <CardHeader>
-              <CardTitle className="text-lg">Career Trajectory</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-lg">Career Trajectory</CardTitle>
+                {career.ai_trajectory && (
+                  <div className="flex items-center gap-1">
+                    <Sparkles className="h-3 w-3 text-purple-500" />
+                    <span className="text-xs text-purple-500">AI-enhanced</span>
+                  </div>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              {career.typical_path && (
-                <DetailRow label="Typical Path" value={career.typical_path} />
+              {career.ai_trajectory ? (
+                <p className="text-sm text-muted-foreground whitespace-pre-line">
+                  {career.ai_trajectory}
+                </p>
+              ) : (
+                <>
+                  {career.typical_path && (
+                    <DetailRow label="Typical Path" value={career.typical_path} />
+                  )}
+                  {career.time_to_promotion && (
+                    <DetailRow
+                      label="Time to Promotion"
+                      value={career.time_to_promotion}
+                    />
+                  )}
+                  {career.career_ceiling && (
+                    <DetailRow
+                      label="Career Ceiling"
+                      value={career.career_ceiling}
+                    />
+                  )}
+                </>
               )}
-              {career.time_to_promotion && (
-                <DetailRow
-                  label="Time to Promotion"
-                  value={career.time_to_promotion}
-                />
-              )}
-              {career.career_ceiling && (
-                <DetailRow
-                  label="Career Ceiling"
-                  value={career.career_ceiling}
-                />
+              {career.ai_trajectory && career.typical_path && (
+                <>
+                  <Separator />
+                  {career.typical_path && (
+                    <DetailRow label="Typical Path" value={career.typical_path} />
+                  )}
+                  {career.time_to_promotion && (
+                    <DetailRow
+                      label="Time to Promotion"
+                      value={career.time_to_promotion}
+                    />
+                  )}
+                  {career.career_ceiling && (
+                    <DetailRow
+                      label="Career Ceiling"
+                      value={career.career_ceiling}
+                    />
+                  )}
+                </>
               )}
             </CardContent>
           </Card>

@@ -113,16 +113,16 @@ FALLBACK_LAYOFF_RISK = {
 }
 
 def get_layoff_data(career_mapping):
-    """Get layoff risk data with fallback."""
+    """Get layoff risk data with fallback. Returns (data, is_live)."""
     data = scrape_layoffs(career_mapping)
     if len(data) < 5:
         print("  [fallback] Using static layoff risk assessment")
-        data = FALLBACK_LAYOFF_RISK
-    return data
+        return FALLBACK_LAYOFF_RISK, False
+    return data, True
 
 if __name__ == "__main__":
     mapping = load_career_mapping()
-    risk = get_layoff_data(mapping)
+    risk, _ = get_layoff_data(mapping)
     print(f"\nLayoff risk: {len(risk)} careers")
     for level in ["high", "medium", "low"]:
         count = sum(1 for v in risk.values() if v == level)

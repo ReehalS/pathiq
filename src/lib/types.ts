@@ -56,6 +56,12 @@ export interface Career {
   salary_source: string | null;
   openings_source: string | null;
 
+  // AI-generated content
+  ai_description: string | null;
+  ai_trajectory: string | null;
+  ai_requirements: string | null;
+  ai_generated_at: string | null;
+
   // Metadata
   is_trending: boolean;
   created_at: string | null;
@@ -80,6 +86,14 @@ export type Category =
   | "education"
   | "creative"
   | "alternative";
+
+export interface MarketTrend {
+  career_id: string;
+  date: string;
+  average_salary: number | null;
+  employment_count: number | null;
+  source: string | null;
+}
 
 export interface UserProfile {
   year: string;

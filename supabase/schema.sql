@@ -63,6 +63,12 @@ CREATE TABLE careers (
   salary_source TEXT,
   openings_source TEXT,
 
+  -- AI-generated content
+  ai_description TEXT,
+  ai_trajectory TEXT,
+  ai_requirements TEXT,
+  ai_generated_at TIMESTAMPTZ,
+
   -- Metadata
   is_trending BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now(),
@@ -76,8 +82,10 @@ CREATE TABLE market_trends (
   date DATE NOT NULL,
   openings_count INTEGER,
   average_salary INTEGER,
+  employment_count INTEGER,
   source TEXT,
-  created_at TIMESTAMPTZ DEFAULT now()
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(career_id, date)
 );
 
 -- Saved comparisons
@@ -103,4 +111,6 @@ ALTER TABLE comparisons ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Public read careers" ON careers FOR SELECT USING (true);
 CREATE POLICY "Public read trends" ON market_trends FOR SELECT USING (true);
+CREATE POLICY "Public insert trends" ON market_trends FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public update trends" ON market_trends FOR UPDATE USING (true);
 CREATE POLICY "Public all comparisons" ON comparisons FOR ALL USING (true);

@@ -22,7 +22,7 @@ interface CareerCardProps {
 
 export function CareerCard({ career, onCompare }: CareerCardProps) {
   return (
-    <Card className="group relative flex flex-col transition-shadow hover:shadow-md">
+    <Card className="group relative flex flex-col gap-0 transition-shadow hover:shadow-md">
       {career.is_trending && (
         <div className="absolute top-3 right-3">
           <Badge
@@ -34,8 +34,8 @@ export function CareerCard({ career, onCompare }: CareerCardProps) {
           </Badge>
         </div>
       )}
-      <CardHeader className="pb-3">
-        <div className="space-y-1">
+      <CardHeader className="pb-0">
+        <div className="space-y-1.5">
           <h3 className="font-semibold text-lg leading-tight pr-16">
             {career.title}
           </h3>
@@ -49,7 +49,7 @@ export function CareerCard({ career, onCompare }: CareerCardProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 space-y-3">
+      <CardContent className="flex flex-1 flex-col pt-3 space-y-2.5">
         {/* Key Metrics */}
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -86,7 +86,7 @@ export function CareerCard({ career, onCompare }: CareerCardProps) {
         {/* Interest Tags */}
         {career.interests.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {career.interests.slice(0, 3).map((interest) => (
+            {[...new Set(career.interests)].slice(0, 3).map((interest) => (
               <Badge key={interest} variant="secondary" className="text-xs">
                 {interest}
               </Badge>
@@ -94,8 +94,8 @@ export function CareerCard({ career, onCompare }: CareerCardProps) {
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex items-center gap-2 pt-2">
+        {/* Actions — pinned to bottom */}
+        <div className="flex items-center gap-2 pt-2 mt-auto">
           {onCompare && (
             <Button
               variant="outline"

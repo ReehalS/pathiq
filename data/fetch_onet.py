@@ -109,9 +109,16 @@ def fetch_onet(career_mapping):
                             interests_by_soc[soc].append((str(row[elem_col]), score))
 
                     for soc, items in interests_by_soc.items():
-                        # Sort by score, take top 3
+                        # Sort by score, deduplicate, take top 3
                         items.sort(key=lambda x: x[1], reverse=True)
-                        top = [i[0] for i in items[:3]]
+                        seen = set()
+                        top = []
+                        for name, _ in items:
+                            if name not in seen:
+                                seen.add(name)
+                                top.append(name)
+                            if len(top) >= 3:
+                                break
                         if soc not in result:
                             result[soc] = {}
                         result[soc]["interests"] = top
