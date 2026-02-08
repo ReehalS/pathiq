@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { YEAR_OPTIONS, INTEREST_OPTIONS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
@@ -13,10 +14,18 @@ import { ArrowRight, ArrowLeft, GraduationCap, Heart, Target } from "lucide-reac
 
 export function OnboardingForm() {
   const router = useRouter();
+  const { user } = useAuth();
   const { updateProfile } = useUserProfile();
   const [step, setStep] = useState(1);
 
   // Step 1
+  const [name, setName] = useState("");
+
+  // Pre-populate name from signup metadata
+  useEffect(() => {
+    const metaName = user?.user_metadata?.name;
+    if (metaName && !name) setName(metaName);
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
   const [year, setYear] = useState("");
   const [major, setMajor] = useState("");
 
@@ -39,6 +48,7 @@ export function OnboardingForm() {
 
   const handleComplete = () => {
     updateProfile({
+      name,
       year,
       major,
       interests,
@@ -86,6 +96,14 @@ export function OnboardingForm() {
             <CardDescription>This helps us personalize your experience</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Your name</label>
+              <Input
+                placeholder="First name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
             <div>
               <label className="text-sm font-medium mb-2 block">Year in school</label>
               <div className="flex flex-wrap gap-2">

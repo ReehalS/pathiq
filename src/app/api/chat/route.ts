@@ -100,12 +100,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { messages, userProfile } = body as {
       messages: { role: string; content: string }[];
-      userProfile?: { major?: string; year?: string; interests?: string[] };
+      userProfile?: { name?: string; major?: string; year?: string; interests?: string[] };
     };
 
+    const userName = userProfile?.name ? ` named ${userProfile.name}` : "";
     const userContext = userProfile?.year
-      ? `User context: ${userProfile.year} ${userProfile.major || "undergraduate"} student interested in ${(userProfile.interests || []).join(", ") || "exploring options"}.`
-      : "User context: An undergraduate student exploring career options.";
+      ? `User context: A${userName} ${userProfile.year} ${userProfile.major || "undergraduate"} student interested in ${(userProfile.interests || []).join(", ") || "exploring options"}.`
+      : `User context: An undergraduate student${userName} exploring career options.`;
 
     const systemMessage: ChatCompletionMessageParam = {
       role: "system",

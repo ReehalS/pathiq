@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
+import { ScrollToTop } from "@/components/scroll-to-top";
+import { OnboardingRedirect } from "@/components/onboarding-redirect";
 import { AuthProvider } from "@/lib/auth-context";
 
 const geistSans = Geist({
@@ -31,6 +33,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
         <AuthProvider>
+          <ScrollToTop />
+          <OnboardingRedirect />
           <Navbar />
           <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
         </AuthProvider>

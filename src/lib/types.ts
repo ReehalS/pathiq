@@ -99,6 +99,7 @@ export interface MarketTrend {
 }
 
 export interface UserProfile {
+  name: string;
   year: string;
   major: string;
   interests: string[];

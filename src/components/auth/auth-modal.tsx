@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Mail, Lock, AlertCircle } from "lucide-react";
+import { Loader2, Mail, Lock, AlertCircle, User } from "lucide-react";
 
 type AuthMode = "sign-in" | "sign-up";
 
@@ -34,6 +34,7 @@ export function AuthModal({
 }: AuthModalProps) {
   const { signIn, signUp } = useAuth();
   const [mode, setMode] = useState<AuthMode>(defaultMode);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -42,6 +43,7 @@ export function AuthModal({
   const [success, setSuccess] = useState(false);
 
   const resetForm = () => {
+    setName("");
     setEmail("");
     setPassword("");
     setConfirmPassword("");
@@ -107,7 +109,7 @@ export function AuthModal({
           onSuccess?.();
         }
       } else {
-        const { error } = await signUp(email, password);
+        const { error } = await signUp(email, password, name || undefined);
         if (error) {
           setError(error);
         } else {
@@ -163,6 +165,27 @@ export function AuthModal({
               <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                 <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                 <span>{error}</span>
+              </div>
+            )}
+
+            {/* Name (sign-up only) */}
+            {mode === "sign-up" && (
+              <div className="space-y-1.5">
+                <label htmlFor="auth-name" className="text-sm font-medium">
+                  Name
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="auth-name"
+                    type="text"
+                    placeholder="Your first name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="pl-9"
+                    autoComplete="given-name"
+                  />
+                </div>
               </div>
             )}
 

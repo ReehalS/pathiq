@@ -38,7 +38,7 @@ export function ChatInterface() {
         body: JSON.stringify({
           messages: newMessages,
           userProfile: profile.year
-            ? { major: profile.major, year: profile.year, interests: profile.interests }
+            ? { name: profile.name, major: profile.major, year: profile.year, interests: profile.interests }
             : undefined,
         }),
       });
@@ -91,7 +91,7 @@ export function ChatInterface() {
       {/* Messages area */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         {messages.length === 0 ? (
-          <StarterQuestions onSelect={sendMessage} />
+          <StarterQuestions onSelect={sendMessage} userName={profile.name} />
         ) : (
           <div className="mx-auto max-w-3xl px-4 py-6 space-y-4">
             {messages.map((msg, i) => (
