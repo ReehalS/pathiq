@@ -25,18 +25,21 @@ export default function LandingPage() {
       title: "Browse & Filter",
       description:
         "Explore 35+ career paths with real salary data, growth rates, and job openings from BLS and O*NET.",
+      premium: false,
     },
     {
       icon: GitCompare,
       title: "Compare Paths",
       description:
         "Side-by-side comparison of careers with salary trajectories, market outlook, and AI-powered trade-off analysis.",
+      premium: true,
     },
     {
       icon: MessageSquare,
       title: "AI Career Chat",
       description:
         "Ask questions in natural language. Get data-backed answers from an AI advisor with access to live market data.",
+      premium: true,
     },
   ];
 
@@ -115,6 +118,11 @@ export default function LandingPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">{f.description}</p>
+                {f.premium && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Free account required
+                  </p>
+                )}
               </CardContent>
             </Card>
           ))}
