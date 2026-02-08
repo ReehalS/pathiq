@@ -5,6 +5,7 @@ import { Navbar } from "@/components/navbar";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { OnboardingRedirect } from "@/components/onboarding-redirect";
 import { AuthProvider } from "@/lib/auth-context";
+import { UserProfileProvider } from "@/hooks/use-user-profile";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,10 +34,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
         <AuthProvider>
-          <ScrollToTop />
-          <OnboardingRedirect />
-          <Navbar />
-          <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
+          <UserProfileProvider>
+            <ScrollToTop />
+            <OnboardingRedirect />
+            <Navbar />
+            <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
+          </UserProfileProvider>
         </AuthProvider>
       </body>
     </html>

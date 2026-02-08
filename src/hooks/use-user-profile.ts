@@ -1,8 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  type ReactNode,
+} from "react";
 import { UserProfile } from "@/lib/types";
 import { useAuth } from "@/lib/auth-context";
+import React from "react";
 
 const STORAGE_KEY = "pathiq-profile";
 
@@ -60,7 +69,17 @@ function hasData(p: UserProfile): boolean {
   return !!(p.year && p.major);
 }
 
-export function useUserProfile() {
+interface UserProfileContextValue {
+  profile: UserProfile;
+  hasProfile: boolean;
+  loaded: boolean;
+  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  clearProfile: () => Promise<void>;
+}
+
+const UserProfileContext = createContext<UserProfileContextValue | null>(null);
+
+export function UserProfileProvider({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, loading: authLoading, supabase } = useAuth();
   const [profile, setProfile] = useState<UserProfile>(defaultProfile);
   const [hasProfile, setHasProfile] = useState(false);
@@ -154,5 +173,17 @@ export function useUserProfile() {
     localStorage.removeItem(STORAGE_KEY);
   }, [isAuthenticated, user, supabase]);
 
-  return { profile, updateProfile, hasProfile, clearProfile, loaded };
+  return React.createElement(
+    UserProfileContext.Provider,
+    { value: { profile, hasProfile, loaded, updateProfile, clearProfile } },
+    children
+  );
+}
+
+export function useUserProfile() {
+  const ctx = useContext(UserProfileContext);
+  if (!ctx) {
+    throw new Error("useUserProfile must be used within a UserProfileProvider");
+  }
+  return ctx;
 }

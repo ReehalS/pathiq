@@ -46,8 +46,8 @@ export function OnboardingForm() {
     );
   };
 
-  const handleComplete = () => {
-    updateProfile({
+  const handleComplete = async () => {
+    await updateProfile({
       name,
       year,
       major,
@@ -72,7 +72,7 @@ export function OnboardingForm() {
   };
 
   return (
-    <div className="mx-auto max-w-lg px-4">
+    <div className="w-full">
       {/* Progress */}
       <div className="flex items-center justify-center gap-2 mb-8">
         {[1, 2, 3].map((s) => (
@@ -86,6 +86,7 @@ export function OnboardingForm() {
         ))}
       </div>
 
+      <div className="min-h-[480px] w-full">
       {step === 1 && (
         <Card>
           <CardHeader className="text-center">
@@ -201,6 +202,7 @@ export function OnboardingForm() {
           </CardContent>
         </Card>
       )}
+      </div>
 
       {/* Navigation */}
       <div className="flex justify-between mt-6">
