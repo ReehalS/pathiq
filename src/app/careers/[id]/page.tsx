@@ -17,7 +17,10 @@ import { SkillsRadar } from '@/components/skills-radar';
 import { SalaryHistoryChart } from '@/components/salary-history-chart';
 import { EmploymentTrendChart } from '@/components/employment-trend-chart';
 import { SalaryDistributionChart } from '@/components/salary-distribution-chart';
+import { PercentileCalculator } from '@/components/percentile-calculator';
+import { HealthScoreDetail } from '@/components/health-score-badge';
 import { useMarketTrends } from '@/hooks/use-market-trends';
+import { calculateHealthScore } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -97,6 +100,7 @@ export default function CareerDetailPage() {
 
   const hasTrends = trends.length > 0;
   const description = career.ai_description || career.description;
+  const healthScore = career.market_health_score ?? calculateHealthScore(career);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 space-y-8">
@@ -161,6 +165,23 @@ export default function CareerDetailPage() {
         />
       </div>
 
+      {/* Market Health Score */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Market Health Score</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <HealthScoreDetail
+            score={healthScore}
+            growthRate={career.growth_rate_numeric}
+            openings={career.current_openings}
+            salaryEntry={career.salary_entry}
+            salaryYear10={career.salary_year10}
+            layoffRisk={career.layoff_risk}
+          />
+        </CardContent>
+      </Card>
+
       {/* Salary Charts */}
       <Card>
         <CardHeader>
@@ -168,12 +189,15 @@ export default function CareerDetailPage() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="trajectory" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 max-w-sm">
+            <TabsList className="grid w-full grid-cols-3 max-w-md">
               <TabsTrigger value="trajectory" className="text-xs">
-                Salary Trajectory
+                Trajectory
               </TabsTrigger>
               <TabsTrigger value="distribution" className="text-xs">
-                Salary Distribution
+                Distribution
+              </TabsTrigger>
+              <TabsTrigger value="calculator" className="text-xs">
+                Calculator
               </TabsTrigger>
             </TabsList>
             <TabsContent value="trajectory" className="mt-4">
@@ -187,6 +211,12 @@ export default function CareerDetailPage() {
               <SalaryDistributionChart career={career} />
               <p className="text-xs text-muted-foreground mt-2">
                 Source: BLS OEWS May 2024. Shows salary range from 25th to 90th percentile.
+              </p>
+            </TabsContent>
+            <TabsContent value="calculator" className="mt-4">
+              <PercentileCalculator career={career} />
+              <p className="text-xs text-muted-foreground mt-2">
+                Estimated salary at any percentile, interpolated from BLS wage data.
               </p>
             </TabsContent>
           </Tabs>

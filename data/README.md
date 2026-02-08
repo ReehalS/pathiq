@@ -18,25 +18,25 @@ python collect_all.py
 
 ### Required (Automated Download)
 
-| Source | What It Provides | Size |
-|--------|-----------------|------|
-| BLS OEWS | Salaries, employment for 800+ occupations | ~5MB |
-| BLS Projections | Growth rates, annual openings | ~2MB |
-| O*NET Database | Descriptions, skills, interests | ~25MB |
+| Source          | What It Provides                          | Size  |
+| --------------- | ----------------------------------------- | ----- |
+| BLS OEWS        | Salaries, employment for 800+ occupations | ~5MB  |
+| BLS Projections | Growth rates, annual openings             | ~2MB  |
+| O\*NET Database | Descriptions, skills, interests           | ~25MB |
 
 ### Optional (Free API / Scraping)
 
-| Source | What It Provides | Setup |
-|--------|-----------------|-------|
-| Adzuna | Live job posting counts | Free signup at developer.adzuna.com |
-| levels.fyi | Tech total compensation | Automated scraping (needs Playwright) |
-| layoffs.fyi | Industry layoff risk | Automated scraping (needs Playwright) |
+| Source      | What It Provides        | Setup                                 |
+| ----------- | ----------------------- | ------------------------------------- |
+| Adzuna      | Live job posting counts | Free signup at developer.adzuna.com   |
+| levels.fyi  | Tech total compensation | Automated scraping (needs Playwright) |
+| layoffs.fyi | Industry layoff risk    | Automated scraping (needs Playwright) |
 
 ## Files
 
 - `career_mapping.json` — 35 careers mapped to SOC codes
 - `fetch_bls.py` — BLS OEWS salary + projections data
-- `fetch_onet.py` — O*NET skills, interests, descriptions
+- `fetch_onet.py` — O\*NET skills, interests, descriptions
 - `fetch_job_openings.py` — Adzuna API job counts
 - `scrape_levels.py` — levels.fyi tech compensation
 - `scrape_layoffs.py` — layoffs.fyi layoff risk

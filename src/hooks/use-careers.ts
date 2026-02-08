@@ -19,6 +19,7 @@ export function useCareers(initialFilters?: Partial<CareerFilters>) {
       if (filters.categories?.length) params.set("category", filters.categories.join(","));
       if (filters.minSalary) params.set("minSalary", String(filters.minSalary));
       if (filters.maxSalary) params.set("maxSalary", String(filters.maxSalary));
+      if (filters.workLifeBalance?.length) params.set("workLifeBalance", filters.workLifeBalance.join(","));
       if (filters.sort) params.set("sort", filters.sort);
 
       const res = await fetch(`/api/careers?${params.toString()}`);

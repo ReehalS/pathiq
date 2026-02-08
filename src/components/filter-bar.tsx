@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CareerFilters, PathType, Category } from "@/lib/types";
-import { PATH_TYPE_OPTIONS, CATEGORY_OPTIONS, SORT_OPTIONS } from "@/lib/constants";
+import { PATH_TYPE_OPTIONS, CATEGORY_OPTIONS, SORT_OPTIONS, WORK_LIFE_OPTIONS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface FilterBarProps {
@@ -35,6 +35,14 @@ export function FilterBar({ filters, onFiltersChange, resultCount }: FilterBarPr
       ? current.filter((c) => c !== cat)
       : [...current, cat];
     onFiltersChange({ ...filters, categories: next });
+  };
+
+  const toggleWorkLife = (wlb: string) => {
+    const current = filters.workLifeBalance || [];
+    const next = current.includes(wlb)
+      ? current.filter((w) => w !== wlb)
+      : [...current, wlb];
+    onFiltersChange({ ...filters, workLifeBalance: next });
   };
 
   return (
@@ -105,6 +113,26 @@ export function FilterBar({ filters, onFiltersChange, resultCount }: FilterBarPr
                 onClick={() => togglePathType(pt.value)}
               >
                 {pt.label}
+              </Badge>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Work-Life Balance */}
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-muted-foreground">Work-Life Balance</p>
+        <div className="flex flex-wrap gap-2">
+          {WORK_LIFE_OPTIONS.map((wlb) => {
+            const active = filters.workLifeBalance?.includes(wlb.value);
+            return (
+              <Badge
+                key={wlb.value}
+                variant={active ? "default" : "outline"}
+                className="cursor-pointer transition-colors"
+                onClick={() => toggleWorkLife(wlb.value)}
+              >
+                {wlb.label}
               </Badge>
             );
           })}

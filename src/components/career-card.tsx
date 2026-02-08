@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Briefcase, TrendingUp, Sparkles } from 'lucide-react';
+import { HealthScoreBadge } from '@/components/health-score-badge';
 
 interface CareerCardProps {
   career: Career;
@@ -23,8 +24,8 @@ interface CareerCardProps {
 export function CareerCard({ career, onCompare }: CareerCardProps) {
   return (
     <Card className="group relative flex flex-col gap-0 transition-shadow hover:shadow-md">
-      {career.is_trending && (
-        <div className="absolute top-3 right-3">
+      <div className="absolute top-3 right-3 flex items-center gap-1.5">
+        {career.is_trending && (
           <Badge
             variant="secondary"
             className="gap-1 bg-yellow-100 text-yellow-800 text-xs"
@@ -32,8 +33,11 @@ export function CareerCard({ career, onCompare }: CareerCardProps) {
             <Sparkles className="h-3 w-3" />
             Trending
           </Badge>
-        </div>
-      )}
+        )}
+        {career.market_health_score != null && (
+          <HealthScoreBadge score={career.market_health_score} size="sm" />
+        )}
+      </div>
       <CardHeader className="pb-0">
         <div className="space-y-1.5">
           <h3 className="font-semibold text-lg leading-tight pr-16">

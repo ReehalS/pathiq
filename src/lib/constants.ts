@@ -27,7 +27,15 @@ export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "growth-desc", label: "Growth Rate: High to Low" },
   { value: "growth-asc", label: "Growth Rate: Low to High" },
   { value: "openings-desc", label: "Openings: Most First" },
+  { value: "health-desc", label: "Market Health: Best First" },
   { value: "alphabetical", label: "Alphabetical" },
+];
+
+export const WORK_LIFE_OPTIONS: { value: string; label: string }[] = [
+  { value: "Excellent", label: "Excellent" },
+  { value: "Above Average", label: "Above Average" },
+  { value: "Average", label: "Average" },
+  { value: "Below Average", label: "Below Average" },
 ];
 
 export const RIASEC: Record<string, { name: string; description: string }> = {

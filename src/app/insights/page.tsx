@@ -4,10 +4,11 @@ import { useCareers } from "@/hooks/use-careers";
 import { GrowthChart } from "@/components/growth-chart";
 import { SalaryRangeChart } from "@/components/salary-range-chart";
 import { CategoryChart } from "@/components/category-chart";
+import { SweetSpotChart } from "@/components/sweet-spot-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BarChart3, TrendingUp, DollarSign, Users, Briefcase } from "lucide-react";
+import { BarChart3, TrendingUp, DollarSign, Users, Briefcase, Target } from "lucide-react";
 import { formatCompactCurrency, formatCompactNumber } from "@/lib/utils";
 
 export default function InsightsPage() {
@@ -145,21 +146,31 @@ export default function InsightsPage() {
           <CardTitle className="text-lg">Market Overview</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="growth" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <Tabs defaultValue="sweet-spots" className="w-full">
+            <TabsList className="grid w-full grid-cols-4 max-w-lg">
+              <TabsTrigger value="sweet-spots" className="gap-1.5 text-xs">
+                <Target className="h-3.5 w-3.5" />
+                Sweet Spots
+              </TabsTrigger>
               <TabsTrigger value="growth" className="gap-1.5 text-xs">
                 <TrendingUp className="h-3.5 w-3.5" />
-                Growth Rates
+                Growth
               </TabsTrigger>
               <TabsTrigger value="salary" className="gap-1.5 text-xs">
                 <DollarSign className="h-3.5 w-3.5" />
-                Salary Ranking
+                Salary
               </TabsTrigger>
               <TabsTrigger value="category" className="gap-1.5 text-xs">
                 <BarChart3 className="h-3.5 w-3.5" />
-                By Category
+                Category
               </TabsTrigger>
             </TabsList>
+            <TabsContent value="sweet-spots" className="mt-4">
+              <p className="text-xs text-muted-foreground mb-2">
+                Career paths plotted by salary vs job openings. Bubble size = growth rate.
+              </p>
+              <SweetSpotChart careers={careers} />
+            </TabsContent>
             <TabsContent value="growth" className="mt-4">
               <p className="text-xs text-muted-foreground mb-2">
                 Top 15 careers by projected 10-year growth rate (BLS 2023-2033)

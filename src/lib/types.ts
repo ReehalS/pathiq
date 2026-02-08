@@ -62,6 +62,9 @@ export interface Career {
   ai_requirements: string | null;
   ai_generated_at: string | null;
 
+  // Computed
+  market_health_score?: number;
+
   // Metadata
   is_trending: boolean;
   created_at: string | null;
@@ -124,6 +127,7 @@ export interface CareerFilters {
   categories: Category[];
   minSalary: number;
   maxSalary: number;
+  workLifeBalance: string[];
   sort: SortOption;
 }
 
@@ -133,4 +137,5 @@ export type SortOption =
   | "growth-desc"
   | "growth-asc"
   | "openings-desc"
+  | "health-desc"
   | "alphabetical";
