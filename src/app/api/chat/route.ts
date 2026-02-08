@@ -59,7 +59,8 @@ async function executeToolCall(name: string, args: Record<string, unknown>) {
     case "searchCareers": {
       let query = supabase.from("careers").select("id, title, category, path_type, salary_median, salary_entry, growth_rate, growth_rate_numeric, current_openings, description, layoff_risk, is_trending");
       if (args.query) {
-        query = query.or(`title.ilike.%${args.query}%,description.ilike.%${args.query}%,category.ilike.%${args.query}%`);
+        const q = args.query as string;
+        query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%,category.ilike.%${q}%,id.ilike.%${q}%`);
       }
       if (args.category) {
         query = query.eq("category", args.category);
@@ -98,15 +99,29 @@ async function executeToolCall(name: string, args: Record<string, unknown>) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { messages, userProfile } = body as {
+    const { messages, userProfile, aboutCareerId } = body as {
       messages: { role: string; content: string }[];
       userProfile?: { name?: string; major?: string; year?: string; interests?: string[] };
+      aboutCareerId?: string;
     };
 
     const userName = userProfile?.name ? ` named ${userProfile.name}` : "";
     const userContext = userProfile?.year
       ? `User context: A${userName} ${userProfile.year} ${userProfile.major || "undergraduate"} student interested in ${(userProfile.interests || []).join(", ") || "exploring options"}.`
       : `User context: An undergraduate student${userName} exploring career options.`;
+
+    // Pre-fetch career data if navigated from a career detail page
+    let careerContext = "";
+    if (aboutCareerId) {
+      const { data: career } = await supabase
+        .from("careers")
+        .select("*")
+        .eq("id", aboutCareerId)
+        .single();
+      if (career) {
+        careerContext = `\n\nThe user is asking about this specific career from our database:\n${JSON.stringify(career, null, 2)}\n\nUse this data to answer their question. You MUST cite these real numbers, do NOT use general knowledge for salary or growth figures.`;
+      }
+    }
 
     const systemMessage: ChatCompletionMessageParam = {
       role: "system",
@@ -116,7 +131,7 @@ You help undergraduate students explore and compare post-graduation career paths
 ${userContext}
 
 Guidelines:
-- Always query the database for specific data using the provided tools (don't make up numbers)
+- ALWAYS use the provided tools to query the database for specific data before answering (don't make up numbers or use general knowledge)
 - Cite data sources (BLS, O*NET) when sharing statistics
 - Suggest 2-3 specific career paths when relevant
 - Keep responses concise (100-150 words)
@@ -124,7 +139,7 @@ Guidelines:
 - If asked about paths not in the database, acknowledge limitations
 - End with a follow-up question or actionable next step
 - Format salary values with dollar signs and commas
-- When comparing, highlight the key trade-off clearly`,
+- When comparing, highlight the key trade-off clearly${careerContext}`,
     };
 
     const apiMessages: ChatCompletionMessageParam[] = [

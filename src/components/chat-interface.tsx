@@ -11,9 +11,10 @@ import { Loader2 } from "lucide-react";
 
 interface ChatInterfaceProps {
   initialQuestion?: string;
+  aboutCareerId?: string;
 }
 
-export function ChatInterface({ initialQuestion }: ChatInterfaceProps) {
+export function ChatInterface({ initialQuestion, aboutCareerId }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { profile } = useUserProfile();
@@ -53,6 +54,7 @@ export function ChatInterface({ initialQuestion }: ChatInterfaceProps) {
           userProfile: profile.year
             ? { name: profile.name, major: profile.major, year: profile.year, interests: profile.interests }
             : undefined,
+          aboutCareerId: aboutCareerId || undefined,
         }),
       });
 

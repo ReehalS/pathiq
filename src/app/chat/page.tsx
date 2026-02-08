@@ -15,7 +15,7 @@ function ChatContent() {
     ? `Tell me about ${aboutTitle}. What are the salary prospects, growth potential, and key skills needed? What should I know before pursuing this career?`
     : undefined;
 
-  return <ChatInterface initialQuestion={initialQuestion} />;
+  return <ChatInterface initialQuestion={initialQuestion} aboutCareerId={aboutId || undefined} />;
 }
 
 export default function ChatPage() {
