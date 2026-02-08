@@ -9,11 +9,16 @@ import { StarterQuestions } from "@/components/starter-questions";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
 
-export function ChatInterface() {
+interface ChatInterfaceProps {
+  initialQuestion?: string;
+}
+
+export function ChatInterface({ initialQuestion }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { profile } = useUserProfile();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const initialSentRef = useRef(false);
 
   const scrollToBottom = () => {
     if (scrollRef.current) {
@@ -24,6 +29,14 @@ export function ChatInterface() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Auto-send initial question from career detail page
+  useEffect(() => {
+    if (initialQuestion && !initialSentRef.current && messages.length === 0) {
+      initialSentRef.current = true;
+      sendMessage(initialQuestion);
+    }
+  }, [initialQuestion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sendMessage = async (content: string) => {
     const userMessage: ChatMessageType = { role: "user", content };

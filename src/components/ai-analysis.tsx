@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles, RefreshCw } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 interface AIAnalysisProps {
   analysis: string | null;
@@ -55,8 +55,8 @@ export function AIAnalysis({ analysis, loading, onAnalyze, disabled }: AIAnalysi
             <Skeleton className="h-4 w-3/4" />
           </div>
         ) : analysis ? (
-          <div className="prose prose-sm max-w-none whitespace-pre-wrap text-sm leading-relaxed">
-            {analysis}
+          <div className="prose prose-sm prose-neutral dark:prose-invert max-w-none text-sm leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+            <ReactMarkdown>{analysis}</ReactMarkdown>
           </div>
         ) : (
           <p className="text-muted-foreground text-sm">

@@ -523,7 +523,7 @@ export default function CareerDetailPage() {
         <PremiumButton
           feature="AI Career Chat"
           variant="outline"
-          onClick={() => router.push(`/chat?about=${career.id}`)}
+          onClick={() => router.push(`/chat?about=${career.id}&title=${encodeURIComponent(career.title)}`)}
           className="gap-2"
         >
           <MessageSquare className="h-4 w-4" />
