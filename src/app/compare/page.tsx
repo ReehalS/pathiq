@@ -1,8 +1,9 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Career } from "@/lib/types";
+import { useAuth } from "@/lib/auth-context";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { PathSelector } from "@/components/path-selector";
 import { ComparisonTable } from "@/components/comparison-table";
@@ -15,6 +16,7 @@ import { GitCompare } from "lucide-react";
 
 function CompareContent() {
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const { profile } = useUserProfile();
 
   const initialPaths = searchParams.get("paths")?.split(",").filter(Boolean) || [];
@@ -22,6 +24,8 @@ function CompareContent() {
   const [careers, setCareers] = useState<Career[]>([]);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [isCached, setIsCached] = useState(false);
+  const checkedCacheRef = useRef<string>("");
 
   // Fetch career data when paths change
   useEffect(() => {
@@ -39,10 +43,22 @@ function CompareContent() {
     });
   }, [selectedPaths]);
 
-  const handleAnalyze = async () => {
+  // Auto-fetch cached analysis when 2+ paths are selected
+  useEffect(() => {
+    if (selectedPaths.length < 2 || !user?.id) return;
+
+    const cacheKey = [...selectedPaths].sort().join(",");
+    if (checkedCacheRef.current === cacheKey) return;
+    checkedCacheRef.current = cacheKey;
+
+    // Check for cached comparison
+    fetchAnalysis(false);
+  }, [selectedPaths, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchAnalysis = async (regenerate: boolean) => {
     if (selectedPaths.length < 2) return;
     setAnalyzing(true);
-    setAiAnalysis(null);
+    if (regenerate) setAiAnalysis(null);
 
     try {
       const res = await fetch("/api/compare", {
@@ -53,18 +69,28 @@ function CompareContent() {
           userProfile: profile.year
             ? { major: profile.major, year: profile.year, interests: profile.interests }
             : undefined,
+          userId: user?.id || undefined,
+          regenerate,
         }),
       });
 
       if (res.ok) {
         const data = await res.json();
         setAiAnalysis(data.aiAnalysis);
+        setIsCached(!!data.cached);
       }
     } catch {
       setAiAnalysis("Failed to generate analysis. Please try again.");
     } finally {
       setAnalyzing(false);
     }
+  };
+
+  const handleAnalyze = () => fetchAnalysis(false);
+  const handleRegenerate = () => {
+    setIsCached(false);
+    checkedCacheRef.current = "";
+    fetchAnalysis(true);
   };
 
   return (
@@ -87,6 +113,8 @@ function CompareContent() {
             onPathsChange={(paths) => {
               setSelectedPaths(paths);
               setAiAnalysis(null);
+              setIsCached(false);
+              checkedCacheRef.current = "";
             }}
           />
         </CardContent>
@@ -143,7 +171,7 @@ function CompareContent() {
           <AIAnalysis
             analysis={aiAnalysis}
             loading={analyzing}
-            onAnalyze={handleAnalyze}
+            onAnalyze={aiAnalysis ? handleRegenerate : handleAnalyze}
             disabled={selectedPaths.length < 2}
           />
         </>

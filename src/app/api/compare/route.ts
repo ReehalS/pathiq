@@ -3,12 +3,19 @@ import { supabase } from "@/lib/supabase";
 import { openai } from "@/lib/openai";
 import { Career } from "@/lib/types";
 
+/** Canonical key for a set of paths (sorted so order doesn't matter). */
+function pathsKey(ids: string[]): string[] {
+  return [...ids].sort();
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { pathIds, userProfile } = body as {
+    const { pathIds, userProfile, userId, regenerate } = body as {
       pathIds: string[];
       userProfile?: { major?: string; year?: string; interests?: string[] };
+      userId?: string;
+      regenerate?: boolean;
     };
 
     if (!pathIds || pathIds.length < 2) {
@@ -16,6 +23,32 @@ export async function POST(request: NextRequest) {
         { error: "At least 2 paths required for comparison" },
         { status: 400 }
       );
+    }
+
+    const sortedPaths = pathsKey(pathIds);
+
+    // Check cache (if authenticated and not regenerating)
+    if (userId && !regenerate) {
+      const { data: cached } = await supabase
+        .from("comparisons")
+        .select("ai_analysis")
+        .eq("user_id", userId)
+        .contains("paths_compared", sortedPaths)
+        .single();
+
+      if (cached?.ai_analysis) {
+        // Fetch careers to return alongside cached analysis
+        const { data: careers } = await supabase
+          .from("careers")
+          .select("*")
+          .in("id", pathIds);
+
+        return NextResponse.json({
+          careers: careers || [],
+          aiAnalysis: cached.ai_analysis,
+          cached: true,
+        });
+      }
     }
 
     // Fetch career data
@@ -84,7 +117,31 @@ Constraints:
 
     const aiAnalysis = completion.choices[0]?.message?.content || "Unable to generate analysis.";
 
-    return NextResponse.json({ careers, aiAnalysis });
+    // Save to cache (if authenticated)
+    if (userId) {
+      // Upsert: delete old comparison for same user + paths, then insert
+      const { data: existing } = await supabase
+        .from("comparisons")
+        .select("id")
+        .eq("user_id", userId)
+        .contains("paths_compared", sortedPaths)
+        .single();
+
+      if (existing) {
+        await supabase
+          .from("comparisons")
+          .update({ ai_analysis: aiAnalysis, created_at: new Date().toISOString() })
+          .eq("id", existing.id);
+      } else {
+        await supabase.from("comparisons").insert({
+          user_id: userId,
+          paths_compared: sortedPaths,
+          ai_analysis: aiAnalysis,
+        });
+      }
+    }
+
+    return NextResponse.json({ careers, aiAnalysis, cached: false });
   } catch (e) {
     console.error("Compare error:", e);
     return NextResponse.json(
